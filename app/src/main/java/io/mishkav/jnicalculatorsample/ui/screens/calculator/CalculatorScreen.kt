@@ -27,6 +27,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.DeleteButton
+import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.DigitButton
+import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.SignButton
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.NumbersPanelContent
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.TopViewValues.inputText
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.TopViewValues.result
@@ -98,20 +101,29 @@ fun NumberPanel() {
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    numbers.forEach {
+                    numbers.forEach { button ->
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxSize()
                                 .clickable {
-                                    inputText += it.content
-                                    result += it.content
+                                    // Hello solid
+                                    when (button) {
+                                        is DigitButton -> {
+                                            inputText += button.content
+                                            result += button.content
+                                        }
+                                        is SignButton -> {
+                                            inputText += button.content
+                                            result += button.content
+                                        }
+                                    }
                                 }
 
                         ) {
                             Text(
-                                text = it.content,
+                                text = button.content,
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.wrapContentSize()
                             )
@@ -124,7 +136,7 @@ fun NumberPanel() {
                 modifier = Modifier.weight(1.3f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                NumbersPanelContent.operations.forEach { sign ->
+                NumbersPanelContent.operations.forEach { operation ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -137,11 +149,20 @@ fun NumberPanel() {
                             modifier = Modifier
                                 .size(80.dp)
                                 .clickable {
-                                    // TODO
+                                    when (operation) {
+                                        is DeleteButton -> {
+                                            inputText = inputText.dropLast(1)
+                                            result = result.dropLast(1)
+                                        }
+                                        else -> {
+                                            inputText += operation.content
+                                            result += operation.content
+                                        }
+                                    }
                                 }
                         ) {
                             Text(
-                                text = sign.content,
+                                text = operation.content,
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.wrapContentSize()

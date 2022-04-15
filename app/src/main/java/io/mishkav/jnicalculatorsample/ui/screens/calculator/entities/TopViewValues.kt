@@ -3,6 +3,7 @@ package io.mishkav.jnicalculatorsample.ui.screens.calculator.entities
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.DeleteButton
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.DigitButton
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.SignButton
 
@@ -33,7 +34,7 @@ object NumbersPanelContent {
         )
     )
     var operations = listOf(
-        SignButton("del"),
+        DeleteButton(),
         SignButton("+"),
         SignButton("-"),
         SignButton("/"),
