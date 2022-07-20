@@ -7,3 +7,4 @@ sealed class Button(
 class DigitButton(digit: String) : Button(content = digit)
 class DeleteButton : Button(content = "del")
 class SignButton(sign: String) : Button(content = sign)
+class EmptyButton() : Button()

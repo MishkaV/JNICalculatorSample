@@ -30,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.DeleteButton
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.DigitButton
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.components.SignButton
+import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.MathState.bufferNext
+import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.MathState.bufferPrev
+import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.MathState.wasSign
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.NumbersPanelContent
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.TopViewValues.inputText
 import io.mishkav.jnicalculatorsample.ui.screens.calculator.entities.TopViewValues.result
@@ -37,15 +40,17 @@ import io.mishkav.jnicalculatorsample.ui.theme.Gray200
 
 @Composable
 fun CalculatorScreen(
-
+    sum: (first: Float, second: Float) -> Float = { _, _ -> 0F },
+    sub: (first: Float, second: Float) -> Float = { _, _ -> 0F },
+    mult: (first: Float, second: Float) -> Float = { _, _ -> 0F },
+    div: (first: Float, second: Float) -> Float = { _, _ -> 0F }
 ) = Column(
     modifier = Modifier
-
         .background(Gray200)
         .fillMaxSize()
 ) {
     TopView()
-    NumberPanel()
+    NumberPanel(sum, sub, mult, div)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,7 +96,12 @@ fun TopView() {
 }
 
 @Composable
-fun NumberPanel() {
+fun NumberPanel(
+    sum: (first: Float, second: Float) -> Float,
+    sub: (first: Float, second: Float) -> Float,
+    mult: (first: Float, second: Float) -> Float,
+    div: (first: Float, second: Float) -> Float
+) {
     Box {
         Row(
             modifier = Modifier.fillMaxSize()
@@ -112,7 +122,13 @@ fun NumberPanel() {
                                     when (button) {
                                         is DigitButton -> {
                                             inputText += button.content
-                                            result += button.content
+
+                                            if (wasSign.isNotEmpty()) {
+                                                bufferNext += button.content
+                                                result = calculate(sum, sub, mult, div)
+                                            } else {
+                                                result += button.content
+                                            }
                                         }
                                         is SignButton -> {
                                             inputText += button.content
@@ -151,10 +167,21 @@ fun NumberPanel() {
                                 .clickable {
                                     when (operation) {
                                         is DeleteButton -> {
-                                            inputText = inputText.dropLast(1)
-                                            result = result.dropLast(1)
+                                            inputText = ""
+                                            result = ""
+                                            bufferNext = ""
+                                            bufferPrev = ""
+                                            wasSign = ""
                                         }
                                         else -> {
+                                            if (wasSign.isNotEmpty()) {
+                                                bufferPrev = calculate(sum, sub, mult, div)
+                                                wasSign = operation.content
+                                                bufferNext = ""
+                                            } else {
+                                                bufferPrev = inputText
+                                                wasSign = operation.content
+                                            }
                                             inputText += operation.content
                                             result += operation.content
                                         }
@@ -174,6 +201,19 @@ fun NumberPanel() {
         }
     }
 }
+
+// Hello solid again
+private fun calculate(
+    sum: (first: Float, second: Float) -> Float,
+    sub: (first: Float, second: Float) -> Float,
+    mult: (first: Float, second: Float) -> Float,
+    div: (first: Float, second: Float) -> Float
+) = when (wasSign) {
+    "+" -> sum(bufferPrev.toFloat(), bufferNext.toFloat())
+    "-" -> sub(bufferPrev.toFloat(), bufferNext.toFloat())
+    "*" -> mult(bufferPrev.toFloat(), bufferNext.toFloat())
+    else -> div(bufferPrev.toFloat(), bufferNext.toFloat())
+}.toString()
 
 @Composable
 @Preview
